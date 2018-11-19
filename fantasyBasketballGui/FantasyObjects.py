@@ -10,8 +10,8 @@ from copy import copy, deepcopy
 class NBAGame(object):
     
     def __init__(self,home,away,date):
-        self.home = home;
-        self.away = away;
+        self.home = home; # name of home team (not object)
+        self.away = away; # name of away team (not object)
         self.date = date;
         
     def __str__(self):
@@ -27,9 +27,28 @@ class NBAGame(object):
         return self.date
     
     def isGamePlayed(self,player):
-        if (player.getTeam() == self.gethome or player.getTeam() == self.getaway) and not player.getInjuryStatus() and player.getStarting():
+        if (player.getTeam() == self.gethome or player.getTeam() == self.getaway()) and not player.getInjuryStatus() and player.getStarting():
             return True
         return False
+    
+class NBATeam(object):
+    
+    def __init__(self,initials,name,NBASchedule):
+        self.initials = initials;
+        self.name = name;
+        
+        self.schedule = deepcopy(NBASchedule);
+        self.schedule.filterByTeam(self.name);
+        
+    def getinitials(self):
+        return self.initials
+    
+    def getname(self):
+        return self.name
+    
+    def getSched(self):
+        return self.schedule
+    
     
 class NBAPlayer(object):
     
@@ -41,10 +60,56 @@ class NBAPlayer(object):
         self.starter = starter;
         
     def __str__(self):
-        return self.getname();
+        return self.getname()
+    
+    def getname(self):
+        return self.name
+    
+    def getteam(self):
+        return self.team   
+    
+    def playerGamesBetween(self,startDate,endDate):
+        temp = deepcopy(self.getteam().getSched());
+        temp.filterByDate(startDate,endDate);
+        
+        return len(temp.getgames())
+    
+class FantasyTeam(object):
+    
+    def __init__(self,name,roster):
+        self.name = name;
+        self.roster = roster;
+        
+    def getroster(self):
+        return self.roster;
     
     def getname(self):
         return self.name;
+        
+    def addplayer(self,player):
+        self.roster.append(player);
+        
+    def teamGamesBetween(self,startDate,endDate):
+        temp = copy(self.getroster());
+        ct = 0;
+        
+        for player in temp:
+            ct += player.playerGamesBetween(startDate,endDate);
+            
+        return ct
+    
+class FantasyLeague(object):
+    
+    def __init__(self,fantasyteams):
+        self.fantasyteams = fantasyteams;
+        
+    def setFantasyTeams(self,teamlist):
+        self.fantasyteams = teamlist;
+        
+    def getFantasyteams(self):
+        return self.fantasyteams;
+        
+        
         
 class Schedule(object):
     
@@ -138,24 +203,94 @@ def monthIndex(month):
 
 
 #######################
+    
+
+scheduleDatafiles = ["DecSchedule.txt","JanSchedule.txt","FebSchedule.txt","MarSchedule.txt","AprSchedule.txt"]
+gamelist = [];
+for fileString in scheduleDatafiles:
+    filestream =  open("ScheduleData/"+fileString, "r");
+    ct = 0;
+
+    for line in filestream:
+        currentline = filestream.readline();
+        if ct > 4:
+            templist = deepcopy(currentline.split(","))
+            if len(templist) > 5:
+                dateString = deepcopy(templist[0]);
+                dateStringList = dateString.split(" ");
+                date = dateStringList[1:4];
+                home = templist[2];
+                away = templist[4];
+                gamelist.append(NBAGame(home,away,date))
+        
+        ct += 1;
+        
+gamelist.append(NBAGame("Golden State Warriors","Orlando Magic",["Feb","28","2019"]))
+
+NBA2018Schedule = Schedule(gamelist);
 
 
-game1 = NBAGame("NY","NJ",["Jan","1","2018"]);
-game2 = NBAGame("Phi","Bos",["Jan","2","2018"]);
-game3 = NBAGame("Phi","NY",["Jan","3","2018"]);
+teamInitials = ["TOR","MIL","IND","PHI","BOS","DET","ORL","CHO","BRK","MIA","WAS","NYK","CHI","ATL","CLE",\
+                "GSW","POR","OKC","LAC","MEM","DEN","NOP","LAL","HOU","SAC","UTA","SAS","DAL","MIN","PHO"];
+teamNames = ["Toronto Raptors","Milwaukee Bucks","Indiana Pacers","Philadelphia 76ers","Boston Celtics",\
+             "Detroit Pistons","Orlando Magic","Charlotte Hornets","Brooklyn Nets","Miami Heat", "Washington Wizards",\
+             "New York Knicks","Chicago Bulls","Atlanta Hawks","Cleveland Cavaliers","Golden State Warriors",\
+             "Portland Trailblazers","Oklahoma City Thunder","Los Angeles Clippers","Memphis Grizzlies","Denver Nuggets",\
+             "New Orleans Pelicans","Los Angeles Lakers","Houston Rockets","Sacramento Kings","Utah Jazz",\
+             "San Antonio Spurs","Dallas Mavericks","Minnesota Timberwolves","Phoenix Suns"];
+             
 
-testSchedule = Schedule([game1,game2,game3]);
+teamlist = [];
+for idx in range(len(teamInitials)):
+    teamlist.append(NBATeam(teamInitials[idx],teamNames[idx],NBA2018Schedule));
 
-testFilteredSchedule = deepcopy(testSchedule);
+TeamDict = {};
+#key: team initials read in from player data sheet
+#elems: tuple(team Object, team name used in game Objects)
+for team in teamlist:
+    TeamDict[team.getinitials()] = team;
+    
+
+playerlist = [];  
+filestream =  open("PlayerData/NBA_players.txt", "r");
+ct = 0;
+for line in filestream:
+    currentline = filestream.readline();
+    if ct > 3:
+        templist = deepcopy(currentline.split(","))
+        if len(templist) > 5:
+            namelist = deepcopy(templist[1]);
+            name = namelist.split("\\")[0];
+            position = templist[2];
+            team = TeamDict[templist[4]]
+            injured = False;
+            starter = True;
+            playerlist.append(NBAPlayer(name,position,team,injured,starter))
+            
+    ct += 1;
+    
+for player in playerlist:
+    print(player.getname())
+    
+    
+
+
+MainOfficePranksters = FantasyTeam("MainOfficePranksters",[KristapsPorzingis,EnesKanter,JoelEmbiid]);
+#print(MainOfficePranksters.teamGamesBetween(["Jan","1","2018"],["Jan","2","2018"]))
+
+
+
+
+#testFilteredSchedule = deepcopy(testSchedule);
 #testFilteredSchedule.filterByTeam("NY");
-testFilteredSchedule.filterByDate(["Jan","3","1994"],["Mar","2","2020"]);
+#testFilteredSchedule.filterByDate(["Jan","3","1994"],["Jan","1","2018"]);
 
-print('#####')
-for game in testSchedule.getgames():
-    print(str(game))
-print('#####')
-for game in testFilteredSchedule.getgames():
-    print(str(game))
+#print('#####')
+#for game in testSchedule.getgames():
+#    print(str(game))
+#print('#####')
+#for game in testFilteredSchedule.getgames():
+#    print(str(game))
         
         
         
