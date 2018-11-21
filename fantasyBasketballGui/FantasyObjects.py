@@ -205,7 +205,7 @@ def monthIndex(month):
 #######################
     
 
-scheduleDatafiles = ["DecSchedule.txt","JanSchedule.txt","FebSchedule.txt","MarSchedule.txt","AprSchedule.txt"]
+scheduleDatafiles = ["DecSchedule.txt","JanSchedule.txt","FebSchedule.xlsx","MarSchedule.txt","AprSchedule.txt"]
 gamelist = [];
 for fileString in scheduleDatafiles:
     filestream =  open("ScheduleData/"+fileString, "r");
@@ -213,7 +213,7 @@ for fileString in scheduleDatafiles:
 
     for line in filestream:
         currentline = filestream.readline();
-        if ct > 4:
+        if ct > -1:
             templist = deepcopy(currentline.split(","))
             if len(templist) > 5:
                 dateString = deepcopy(templist[0]);
@@ -225,9 +225,11 @@ for fileString in scheduleDatafiles:
         
         ct += 1;
         
-gamelist.append(NBAGame("Golden State Warriors","Orlando Magic",["Feb","28","2019"]))
+#gamelist.append(NBAGame("Golden State Warriors","Orlando Magic",["Feb","28","2019"]))
 
 NBA2018Schedule = Schedule(gamelist);
+for game in NBA2018Schedule.getgames():
+    print(game)
 
 
 teamInitials = ["TOR","MIL","IND","PHI","BOS","DET","ORL","CHO","BRK","MIA","WAS","NYK","CHI","ATL","CLE",\
@@ -269,13 +271,13 @@ for line in filestream:
             
     ct += 1;
     
-for player in playerlist:
-    print(player.getname())
+# for player in playerlist:
+#     print(player.getname())
     
     
 
 
-MainOfficePranksters = FantasyTeam("MainOfficePranksters",[KristapsPorzingis,EnesKanter,JoelEmbiid]);
+#MainOfficePranksters = FantasyTeam("MainOfficePranksters",[KristapsPorzingis,EnesKanter,JoelEmbiid]);
 #print(MainOfficePranksters.teamGamesBetween(["Jan","1","2018"],["Jan","2","2018"]))
 
 
