@@ -6,6 +6,7 @@ Created on Sun Nov 18 08:47:53 2018
 @author: douglasfamularo
 """
 from copy import copy, deepcopy
+from xlrd import open_workbook
 
 class NBAGame(object):
     
@@ -201,99 +202,22 @@ def monthIndex(month):
         
     return ValueError
 
-
-#######################
-    
-
-scheduleDatafiles = ["DecSchedule.txt","JanSchedule.txt","FebSchedule.xlsx","MarSchedule.txt","AprSchedule.txt"]
-gamelist = [];
-for fileString in scheduleDatafiles:
-    filestream =  open("ScheduleData/"+fileString, "r");
-    ct = 0;
-
-    for line in filestream:
-        currentline = filestream.readline();
-        if ct > -1:
-            templist = deepcopy(currentline.split(","))
-            if len(templist) > 5:
-                dateString = deepcopy(templist[0]);
-                dateStringList = dateString.split(" ");
-                date = dateStringList[1:4];
-                home = templist[2];
-                away = templist[4];
-                gamelist.append(NBAGame(home,away,date))
+def getPlayerObject(playerlist,name):
+    for player in playerlist:
+        if player.getname() == name:
+            return player
         
-        ct += 1;
-        
-#gamelist.append(NBAGame("Golden State Warriors","Orlando Magic",["Feb","28","2019"]))
+    return ValueError
 
-NBA2018Schedule = Schedule(gamelist);
-for game in NBA2018Schedule.getgames():
-    print(game)
-
-
-teamInitials = ["TOR","MIL","IND","PHI","BOS","DET","ORL","CHO","BRK","MIA","WAS","NYK","CHI","ATL","CLE",\
-                "GSW","POR","OKC","LAC","MEM","DEN","NOP","LAL","HOU","SAC","UTA","SAS","DAL","MIN","PHO"];
-teamNames = ["Toronto Raptors","Milwaukee Bucks","Indiana Pacers","Philadelphia 76ers","Boston Celtics",\
-             "Detroit Pistons","Orlando Magic","Charlotte Hornets","Brooklyn Nets","Miami Heat", "Washington Wizards",\
-             "New York Knicks","Chicago Bulls","Atlanta Hawks","Cleveland Cavaliers","Golden State Warriors",\
-             "Portland Trailblazers","Oklahoma City Thunder","Los Angeles Clippers","Memphis Grizzlies","Denver Nuggets",\
-             "New Orleans Pelicans","Los Angeles Lakers","Houston Rockets","Sacramento Kings","Utah Jazz",\
-             "San Antonio Spurs","Dallas Mavericks","Minnesota Timberwolves","Phoenix Suns"];
-             
-
-teamlist = [];
-for idx in range(len(teamInitials)):
-    teamlist.append(NBATeam(teamInitials[idx],teamNames[idx],NBA2018Schedule));
-
-TeamDict = {};
-#key: team initials read in from player data sheet
-#elems: tuple(team Object, team name used in game Objects)
-for team in teamlist:
-    TeamDict[team.getinitials()] = team;
-    
-
-playerlist = [];  
-filestream =  open("PlayerData/NBA_players.txt", "r");
-ct = 0;
-for line in filestream:
-    currentline = filestream.readline();
-    if ct > 3:
-        templist = deepcopy(currentline.split(","))
-        if len(templist) > 5:
-            namelist = deepcopy(templist[1]);
-            name = namelist.split("\\")[0];
-            position = templist[2];
-            team = TeamDict[templist[4]]
-            injured = False;
-            starter = True;
-            playerlist.append(NBAPlayer(name,position,team,injured,starter))
-            
-    ct += 1;
-    
-# for player in playerlist:
-#     print(player.getname())
-    
-    
+def createRoster(filename,playerList):
+    rosterList = [];
+    filestream = open_workbook(filename)     
+    for s in filestream.sheets():
+        for row in range(s.nrows):
+            if row > 0:
+                playerName = str(s.cell_value(row,0));
+                rosterList.append(getPlayerObject(playerList,playerName));
+                
+    return rosterList
 
 
-#MainOfficePranksters = FantasyTeam("MainOfficePranksters",[KristapsPorzingis,EnesKanter,JoelEmbiid]);
-#print(MainOfficePranksters.teamGamesBetween(["Jan","1","2018"],["Jan","2","2018"]))
-
-
-
-
-#testFilteredSchedule = deepcopy(testSchedule);
-#testFilteredSchedule.filterByTeam("NY");
-#testFilteredSchedule.filterByDate(["Jan","3","1994"],["Jan","1","2018"]);
-
-#print('#####')
-#for game in testSchedule.getgames():
-#    print(str(game))
-#print('#####')
-#for game in testFilteredSchedule.getgames():
-#    print(str(game))
-        
-        
-        
-            
