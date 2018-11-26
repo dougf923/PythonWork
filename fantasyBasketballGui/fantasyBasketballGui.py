@@ -6,9 +6,11 @@ Created on Thu Nov 22 09:59:20 2018
 @author: douglasfamularo
 """
 
-from FantasyObjects import *   
+from FantasyObjects import *  
+from guiDefinition import * 
 
-scheduleDatafiles = ["DecSchedule.xlsx","JanSchedule.xlsx","FebSchedule.xlsx","MarSchedule.xlsx","AprSchedule.xlsx"];
+scheduleDatafiles = ["NovSchedule.xlsx","DecSchedule.xlsx","JanSchedule.xlsx",\
+                     "FebSchedule.xlsx","MarSchedule.xlsx","AprSchedule.xlsx"];
 gamelist = [];
 for fileString in scheduleDatafiles:
     filestream = open_workbook("ScheduleData/"+fileString)
@@ -35,7 +37,7 @@ teamInitials = ["TOR","MIL","IND","PHI","BOS","DET","ORL","CHO","BRK","MIA","WAS
 teamNames = ["Toronto Raptors","Milwaukee Bucks","Indiana Pacers","Philadelphia 76ers","Boston Celtics",\
              "Detroit Pistons","Orlando Magic","Charlotte Hornets","Brooklyn Nets","Miami Heat", "Washington Wizards",\
              "New York Knicks","Chicago Bulls","Atlanta Hawks","Cleveland Cavaliers","Golden State Warriors",\
-             "Portland Trailblazers","Oklahoma City Thunder","Los Angeles Clippers","Memphis Grizzlies","Denver Nuggets",\
+             "Portland Trail Blazers","Oklahoma City Thunder","Los Angeles Clippers","Memphis Grizzlies","Denver Nuggets",\
              "New Orleans Pelicans","Los Angeles Lakers","Houston Rockets","Sacramento Kings","Utah Jazz",\
              "San Antonio Spurs","Dallas Mavericks","Minnesota Timberwolves","Phoenix Suns"];
              
@@ -69,18 +71,30 @@ for s in filestream.sheets():
 #    print(player.getteam())
     
 
+fantasyTeamRosterData = ["MainOfficePranksters.xlsx","Kirilenko Collusion.xlsx",\
+                         "Bopsytriplet923.xlsx","El Guys.xlsx","jesse's Genius Team.xlsx",\
+                         "Kawhi's Kookamonga's.xlsx","LAWbronAbidinCitizen.xlsx",\
+                         "pimp juice j.xlsx","Quarter Breeds.xlsx","Warden of Winterfell.xlsx",\
+                         "We’re Guaaaaaarrrrds.xlsx"];
+
+fantasyTeamList = [];
+for ft in fantasyTeamRosterData:
+    roster = createRoster("fantasyTeamData/"+ft,playerList);
+    team = FantasyTeam(ft[:-5],roster);
+    fantasyTeamList.append(team);
     
 
-MOPRoster = createRoster("fantasyTeamData/MainOfficePranksters.xlsx",playerList);
-MainOfficePranksters = FantasyTeam("MainOfficePranksters",MOPRoster);
-
-KCRoster = createRoster("fantasyTeamData/Kirilenko Collusion.xlsx",playerList);
-KirilenkoCollusion = FantasyTeam("Kirilenko Collusion",KCRoster);
+#MOPRoster = createRoster("fantasyTeamData/MainOfficePranksters.xlsx",playerList);
+#MainOfficePranksters = FantasyTeam("MainOfficePranksters",MOPRoster);
+#
+#KCRoster = createRoster("fantasyTeamData/Kirilenko Collusion.xlsx",playerList);
+#KirilenkoCollusion = FantasyTeam("Kirilenko Collusion",KCRoster);
 ## TEST ##
 #for player in KirilenkoCollusion.getroster():
 #    print(player.getname())
 
-flatEarthers = FantasyLeague([MainOfficePranksters, KirilenkoCollusion]);
+#flatEarthers = FantasyLeague([MainOfficePranksters, KirilenkoCollusion]);
+flatEarthers = FantasyLeague(fantasyTeamList);
 
 
 
@@ -96,4 +110,8 @@ flatEarthers = FantasyLeague([MainOfficePranksters, KirilenkoCollusion]);
 #    print(str(game))
         
         
-        
+#root = Tk();
+league = flatEarthers;
+#setupVars = appSetup(league);
+A = GameCounterApp(root, flatEarthers) #, setupVars[0], setupVars[1]);
+root.mainloop(); 

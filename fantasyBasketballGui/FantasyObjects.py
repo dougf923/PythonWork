@@ -72,6 +72,7 @@ class NBAPlayer(object):
     def playerGamesBetween(self,startDate,endDate):
         temp = deepcopy(self.getteam().getSched());
         temp.filterByDate(startDate,endDate);
+
         
         return len(temp.getgames())
     
@@ -107,7 +108,7 @@ class FantasyLeague(object):
     def setFantasyTeams(self,teamlist):
         self.fantasyteams = teamlist;
         
-    def getFantasyteams(self):
+    def getFantasyTeams(self):
         return self.fantasyteams;
         
         
@@ -199,6 +200,7 @@ def monthIndex(month):
     for test in months:
         if month == test:
             return ct+1;
+        ct += 1;
         
     return ValueError
 
